@@ -1,0 +1,18 @@
+# This is the main tasks file for ann_alias role
+- name: Creating temporal ps1 execution folder
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: directory
+
+- name: Creates ps1 from its jinja2 template
+  template: src="ConfigureDBAlias.ps1.j2" dest="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1ConfigureDBAlias'] }}"
+
+# Executes ps1 
+- name: Starting ps1 execution
+  win_shell: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1ConfigureDBAlias'] }}"    
+
+- name: Deleteing temporal ps1 execution folder
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: absent
+  when: not config.debug

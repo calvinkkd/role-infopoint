@@ -1,0 +1,14 @@
+---
+# Copy Dir
+# Copia un directorio completo desde una ubicación del repositorio a un destino en una máquina Windows controlada por Ansible
+
+- name: "CopyDir {{ package_name }} - Creating temporal ps1 execution folder"
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: directory
+
+- name: "CopyDir {{ package_name }} - Copy download ps1 to host machine"
+  template: src="CopyFromRepository.ps1.j2" dest="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1DownloadFolder'] }}"
+
+- name: "CopyDir {{ package_name }} - Download Folder to destination folder machine"
+  win_shell: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1DownloadFolder'] }}"    

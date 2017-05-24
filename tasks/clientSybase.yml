@@ -1,0 +1,94 @@
+# Installation and configuration of Sybase's DB Client
+
+- name: 'Installing Sybase DB client : Creating temporal ps1 execution folder'
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: directory
+
+- name: 'Installing Sybase DB client: Pre-requisites... VCRedistributable2010 32 bits'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['VCRedistrPath'] }}vcredist_x86.exe"
+    productid: '{F0C3E5D1-1ADE-321E-8167-68EF0DE699A5}'
+    arguments: '/q /norestart'
+    ensure: present
+
+- name: 'Installing Sybase DB client: Pre-requisites... VCRedistributable2010 64 bits'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['VCRedistrPath'] }}vcredist_x64.exe"
+    productid: '{1D8E6291-B0D5-35EC-8441-6616F567A0F7}'
+    arguments: '/q /norestart'
+    ensure: present
+
+- name: 'Installing Sybase DB client: Downloading 32-bits config installation file from repository'
+  include: copyDir.yml 
+  vars: 
+      package_name: "Sybase.ConfigFile32"
+
+- name: 'Installing Sybase DB client: Downloading 64-bits config installation file from repository'
+  include: copyDir.yml 
+  vars: 
+      package_name: "Sybase.ConfigFile64"
+
+- name: 'Installing Sybase DB client: Downloading 64-bits client'
+  include: copyDir.yml 
+  vars: 
+      package_name: "Sybase.Client64"
+
+- name: 'Installing Sybase DB client: Downloading 32-bits client'
+  include: copyDir.yml 
+  vars: 
+      package_name: "Sybase.Client32"
+
+- name: 'Installing Sybase DB client: Creating ps1 installation file from template'
+  win_template:
+     src: "installClientSybase.ps1.j2"
+     dest: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1InstallClientSybase'] }}" 
+
+- name: 'Installing Sybase DB client: Installing client...'
+  win_shell: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1InstallClientSybase'] }}"    
+
+
+- name: "Installing Sybase DB client: Ensure environment variable {{ db_clients['sybase']['env_sybase_name'] }}"
+  win_environment:
+    state: present
+    name: "{{ db_clients['sybase']['env_sybase_name'] }}"
+    value: "{{ db_clients['sybase']['env_sybase_value'] }}"
+    level: machine
+
+- name: "Installing Sybase DB client: Ensure environment variable {{ db_clients['sybase']['env_include_name'] }}"
+  win_environment:
+    state: present
+    name: "{{ db_clients['sybase']['env_include_name'] }}"
+    value: "{{ db_clients['sybase']['env_include_value'] }}"
+    level: machine
+
+- name: "Installing Sybase DB client: Ensure environment variable {{ db_clients['sybase']['env_sybaseOCS_name'] }}"
+  win_environment:
+    state: present
+    name: "{{ db_clients['sybase']['env_sybaseOCS_name'] }}"
+    value: "{{ db_clients['sybase']['env_sybaseOCS_value'] }}"
+    level: machine    
+
+# Esto es de la 2.3. Pendiente ver qué se hace con el PATH, porque ahí hay otras variables
+#- name: "Installing Sybase DB client: Ensure environment variable PATH"
+#  win_path:
+#    name: PATH
+#    elements: 
+#    - 'C:\sybase\OCS-15_0\lib3p;'
+#    - 'C:\sybase\OCS-15_0\dll;'
+#    - 'C:\sybase\OCS-15_0\bin;'
+#    - 'C:\sybase\DataAccess\ADONET\dll;'
+#    - 'C:\sybase\DataAccess\OLEDB\dll;'
+#    - 'C:\sybase\DataAccess\ODBC\dll;'
+#    - 'C:\sybase\DataAccess64\ADONET\dll;'
+#    - 'C:\sybase\DataAccess64\OLEDB\dll;'
+#    - 'C:\sybase\DataAccess64\ODBC\dll;'  
+#    scope: machine
+#    state: present
+
+- name: 'Installing Sybase DB client: Deleting temporal ps1 execution folder'
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: absent
+  when: not config.debug
+

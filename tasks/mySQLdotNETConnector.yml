@@ -1,0 +1,10 @@
+---
+# MySQL .NET Connector
+
+- name: 'MySQL .NET Connector'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['mySQLdotNETConnectorPath'] }}{{ config['repo']['mySQLdotNETConnectorMsi'] }}"
+    productid: '{5FD88490-011C-4DF1-B886-F298D955171B}'
+    arguments: '/quiet '
+    ensure: present
+    

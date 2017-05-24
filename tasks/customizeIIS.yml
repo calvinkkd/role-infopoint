@@ -1,0 +1,18 @@
+# This is the main tasks file for ann_alias role
+- name: 'Customize IIS for Infopoint: Creating temporal ps1 execution folder'
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: directory
+
+- name: 'Customize IIS for Infopoint: Creating ps1 installation file from template'
+  template: src="customizeIIS4Infopoint.ps1.j2" dest="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1CustomizeIIS4Infopoint'] }}"  
+
+- name: 'Customize IIS for Infopoint: Starting installation'
+  win_shell: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1CustomizeIIS4Infopoint'] }}"    
+
+- name: 'Customize IIS for Infopoint: Deleting temporal ps1 execution folder'
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: absent
+  when: not config.debug
+

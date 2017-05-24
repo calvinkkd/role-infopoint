@@ -1,0 +1,7 @@
+---
+#filename: roles/role-infopoint/defaults/users.yml
+#default users accounts for Windows Servers
+
+users: 
+   localAdministrator:
+       password: Temporal123.

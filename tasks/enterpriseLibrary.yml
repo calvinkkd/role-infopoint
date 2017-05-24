@@ -1,0 +1,16 @@
+---
+# MS Enterprise Library
+
+- name: 'MS Enterprise Library 4.1 - October 2008'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['EnterpriseLibrary41Path'] }}{{ config['repo']['EnterpriseLibrary41Msi'] }}"
+    productid: '{45528AEA-4883-413E-ABB5-471AA26C20D8}'
+    arguments: '/quiet '
+    ensure: present
+
+- name: 'MS Enterprise Library 5.0'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['EnterpriseLibrary50Path'] }}{{ config['repo']['EnterpriseLibrary50Msi'] }}"
+    productid: '{B3BF02F1-C630-4EA9-8D11-38CC34ECEE75}'
+    arguments: '/quiet '
+    ensure: present    

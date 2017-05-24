@@ -1,0 +1,9 @@
+---
+# MS Enterprise Library
+
+- name: 'MS Asp Ajax Extensions 1.0'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['ajaxExtensionsPath'] }}{{ config['repo']['ajaxExtensionsMsi'] }}"
+    productid: '{082BDF7B-4810-4599-BF0D-E3AC44EC8524}'
+    arguments: '/q'
+    ensure: present

@@ -1,0 +1,46 @@
+# Notice:This file is being managed by Ansible
+# Any manual updates will be overwritten
+# filename: roles/role-infopoint/templates/installClientSybase.ps1.j2
+
+"Inicio Proceso" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log"
+Try
+{
+    #"$env:USERDOMAIN\$env:USERNAME"
+    "Inicio Try" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+    whoami | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+    $username = whoami
+    $password = "{{ users['localAdministrator']['password'] }}"
+    $pass = ConvertTo-SecureString $password -AsPlainText -Force
+    $cred = new-object system.management.automation.PSCredential $username,$pass
+    $source64 = "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}pcclient64\setupConsole.exe"
+    $source32 = "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}pcclient32\setupConsole.exe"
+    $installationFile32 = "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}install32.txt"
+    $installationFile64 = "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}install64.txt"
+    
+    try {
+
+        'Installing Client 64 bits' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+        $proc1 = Start-Process -Credential $cred -FilePath $source64 -ArgumentList "-i silent -DAGREE_TO_SYBASE_LICENSE=true -f $installationFile64" -Wait -NoNewWindow
+        $proc1.waitForExit()
+
+        'Installing Client 32 bits' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+        $proc1 = Start-Process -Credential $cred -FilePath $source32 -ArgumentList "-i silent -DAGREE_TO_SYBASE_LICENSE=true -f $installationFile32" -Wait -NoNewWindow
+        $proc1.waitForExit()
+
+        Start-Process Powershell -ArgumentList "& C:\Sybase\OCS-15_0\scripts\copylibs.bat create" 
+                
+        'Installation Done.' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+    } catch [exception] {
+        "'$_ is' $_" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+        "'$_.GetType().FullName is' $_.GetType().FullName" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+        "'$_.Exception is' $_.Exception" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+        "'$_.Exception.GetType().FullName is' $_.Exception.GetType().FullName" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+        "'$_.Exception.Message is' $_.Exception.Message" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+    }
+    
+    Write-Host 'Done. Goodbye.' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+}
+Catch
+{
+    $_.Exception.Message | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGClientSybase.log" -Append
+}

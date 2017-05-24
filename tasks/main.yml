@@ -1,0 +1,57 @@
+# This is the main tasks file for infopoint role
+- include_vars: defaults/users.yml
+
+## jdk installation
+- include: jdkinstall.yml
+
+##Tomcat installation
+- include: copyDir.yml 
+  vars: 
+     package_name: "Tomcat"
+
+##PHP installation
+- include: copyDir.yml 
+  vars: 
+     package_name: "PHP"    
+
+##mySql installation
+- include: copyDir.yml 
+  vars: 
+     package_name: "mySql"
+
+#sybase installation
+- include: copyDir.yml 
+  vars: 
+     package_name: "Sybase"
+
+#SQLServer Alias installation
+- include: configureSQLAlias.yml 
+  vars: 
+     package_name: "Sybase"
+
+#debugView installation
+- include: copyDir.yml 
+  vars: 
+     package_name: "DebugView"
+
+#driver MySQL
+- include: mySQLDriver.yml
+
+#mySQL .NET Connector
+- include: mySQLdotNETConnector.yml
+
+#Enterprise Library
+- include: enterpriseLibrary.yml
+
+#Asp Ajax Extensions
+- include: aspAjaxExtensions.yml
+
+#MS ReportViewer Redistributable 2008 SP1
+- include: reportViewer.yml
+
+#Customize IIS 4 Infopoint
+- include: customizeIIS.yml
+
+#Sybase's DB client
+- include: clientSybase.yml
+

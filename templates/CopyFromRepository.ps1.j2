@@ -1,0 +1,108 @@
+# Notice:This file is being managed by Ansible
+# Any manual updates will be overwritten
+#filename: roles/role-infopoint/templates/CopyFileFromRepository.ps1.j2
+
+$exitValue = 0
+Try
+{
+    $package = "{{ package_name }}"
+    $destination = ""
+    $isRepository = $false
+    
+    if ($package -eq "Tomcat")
+    {
+        $destination="{{ tomcat['tomcat_dest_path'] }}"
+        $repoDirName="{{ config['repo']['tomcatPath'] }}" 
+        $isRepository = $true
+    }
+
+    if ($package -eq "PHP")
+    {
+        $destination="{{ php['php_dest_path'] }}"
+        $repoDirName="{{ config['repo']['phpPath'] }}" 
+        $isRepository = $true
+    }
+
+    if ($package -eq "mySql")
+    {
+        $destination="{{ mySql['mySql_dll_dest_path'] }}"
+        $repoDirName="{{ config['repo']['mySqlDllPath'] }}{{ config['repo']['mySqlDllName'] }}" 
+    }
+
+    if ($package -eq "Sybase")
+    {
+        $destination="{{ sybase['sybase_ini_dest_path'] }}"
+        $repoDirName="{{ config['repo']['sybaseSqlIniPath'] }}{{ config['repo']['sybaseSqlIniName'] }}" 
+    }
+
+    if ($package -eq "Sybase.ConfigFile32")
+    {
+        $destination="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+        $repoDirName="{{ config['repo']['sybase32ClientConfigFile'] }}" 
+    }
+
+    if ($package -eq "Sybase.ConfigFile64")
+    {
+        $destination="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+        $repoDirName="{{ config['repo']['sybase64ClientConfigFile'] }}" 
+    }
+
+        if ($package -eq "Sybase.Client32")
+    {
+        $destination="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+        $repoDirName="{{ config['repo']['sybase32ClientPath'] }}" 
+        $isRepository = $true
+    }
+
+    if ($package -eq "Sybase.Client64")
+    {
+        $destination="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+        $repoDirName="{{ config['repo']['sybase64ClientPath'] }}" 
+        $isRepository = $true
+    }
+
+
+    if ($package -eq "DebugView")
+    {
+        $destination="{{ dbgView['dbgView_dest_path'] }}"
+        $repoDirName="{{ config['repo']['dbgViewExePath'] }}"
+        $isRepository = $true         
+    }
+
+    if ($package -eq "jdk.x64")
+    {
+        $destination="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+        $repoDirName="{{ config['repo']['jdkpath'] }}{{ config['repo']['jdkexe64'] }}"
+    }
+
+    if ($package -eq "jdk.x86")
+    {
+        $destination="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+        $repoDirName="{{ config['repo']['jdkpath'] }}{{ config['repo']['jdkexe86'] }}"
+    }
+
+
+    $source=Join-Path -Path "{{ config['repo']['basePath'] }}" -ChildPath $repoDirName
+    #Check if destination exists
+    $existsDir = Test-Path $destination
+    if (-not $existsDir)
+    {
+        New-Item -ItemType "directory" -Path $destination
+    }
+
+    if ($isRepository)
+    {
+        Copy-Item -Recurse -Filter *.* -path $source -destination $destination -Force
+    }
+    else 
+    {
+        Copy-Item $source -Destination $destination
+    }
+}
+Catch
+{
+    $exitValue = 1000
+}
+
+return $exitValue
+

@@ -1,0 +1,56 @@
+# Notice:This file is being managed by Ansible
+# Any manual updates will be overwritten
+# filename: roles/role-infopoint/templates/installjdk.ini.j2
+
+"Inicio Proceso" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log"
+Try
+{
+    #"$env:USERDOMAIN\$env:USERNAME"
+    "Inicio Try" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    whoami | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    $username = whoami
+    $password = "{{ users['localAdministrator']['password'] }}"
+    $pass = ConvertTo-SecureString $password -AsPlainText -Force
+    $cred = new-object system.management.automation.PSCredential $username,$pass
+            
+    $JDK_VER='{{ jdk["jdk_version"] }}\'
+    $destination64 = "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['repo']['jdkexe64'] }}"
+    $destination86 = "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['repo']['jdkexe86'] }}"
+    
+    'Checking if Java is already installed' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    if ((Test-Path "c:\Program Files (x86)\Java") -Or (Test-Path "c:\Program Files\Java")) {
+        'No need to Install Java' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+        Exit
+    }
+    
+    
+    try {
+        'Installing JDK-x64' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+        $proc1 = Start-Process -Credential $cred -FilePath "$destination64" -ArgumentList "/s REBOOT=ReallySuppress" -Wait -PassThru
+        $proc1.waitForExit()
+        'Installation Done.' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    
+        'Installing JDK-x86' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+        $proc2 = Start-Process -Credential $cred -FilePath "$destination86" -ArgumentList "/s REBOOT=ReallySuppress" -Wait -PassThru
+        $proc2.waitForExit()
+        'Installtion Done.' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    } catch [exception] {
+        "$_" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+        "'$_.GetType().FullName is' $_.GetType().FullName" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+        "'$_.Exception is' $_.Exception" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+        "'$_.Exception.GetType().FullName is' $_.Exception.GetType().FullName" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+        "'$_.Exception.Message is' $_.Exception.Message" | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    }
+    
+    if ((Test-Path "c:\Program Files (x86)\Java") -Or (Test-Path "c:\Program Files\Java")) {
+        'Java installed successfully.' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    }
+    'Setting up Path variables.' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+    [System.Environment]::SetEnvironmentVariable("JAVA_HOME", "c:\Program Files (x86)\Java\jdk$JDK_PATH", "Machine")
+    [System.Environment]::SetEnvironmentVariable("PATH", $Env:Path + ";c:\Program Files (x86)\Java\jdk$JDK_PATH\bin", "Machine")
+    'Done!!! ' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+}
+Catch
+{
+    $_.Exception.Message | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}LOGjdk.log" -Append
+}

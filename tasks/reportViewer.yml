@@ -1,0 +1,11 @@
+---
+# MS Report Viewer 2008
+
+- name: 'MS Report Viewer Redistributable 2008 SP1'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['reportViewerPath'] }}{{ config['repo']['reportViewerMsi'] }}"
+    productid: '{AF2A8E58-DBC6-36D3-A145-7252029F6F48}'
+    arguments: '/q'
+    ensure: present
+
+    

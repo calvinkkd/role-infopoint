@@ -1,0 +1,95 @@
+#List of variables for infopoint role
+
+# config section
+config: 
+  debug: true
+  install:
+    configPath: '{{ ansible_env.TMP }}'
+    configTempFolder: '\Ansible-tmp-PSExecution\'
+    ps1Installjdk: 'installjdk.ps1'
+    ps1DownloadFolder: 'copyFromRepository.ps1'
+    ps1CustomizeIIS4Infopoint: customizeIIS4Infopoint.ps1
+    ps1ConfigureDBAlias: 'ConfigureDBAlias.ps1'
+    ps1InstallClientSybase: 'installClientSybase.ps1'
+    iis_custom_smtp: 'smtp.de.securitas'
+    iis_custom_log: 'C:\IIS\Logs'
+    iis_custom_path_default: 'C:\Sites\'
+    iis_custom_path_mapas: 'Mapas'
+
+# repo section
+  repo:
+    basePath: '\\10.46.72.11\windows\'
+    jdkpath: 'jdk\{{ jdk["jdk_version"] }}\'
+    jdkexe64: 'jdk-{{ jdk["jdk_version"] }}-windows-x64.exe'
+    jdkexe86: 'jdk-{{ jdk["jdk_version"] }}-windows-i586.exe'
+    tomcatPath: 'Infopoint\Tomcat7\'
+    phpPath: 'Infopoint\php\'
+    VCRedistrPath: 'Infopoint\'
+    sybaseSqlIniPath: 'Infopoint\Sybase\'
+    sybaseSqlIniName: 'sqlIni.ini'
+    sybase32ClientPath: 'Cliente_Sybase\ebf25898\pcclient32\'
+    sybase64ClientPath: 'Cliente_Sybase\ebf25898\pcclient64\'
+    sybase32ClientConfigFile: 'infopoint\Sybase\install32.txt'
+    sybase64ClientConfigFile: 'infopoint\Sybase\install64.txt'
+    mySqlDllPath: 'Infopoint\'
+    mySqlDllName: 'libmysql.dll'
+    dbgViewExePath: 'Infopoint\DebugView\'
+    mySQLdotNETConnectorPath: 'Infopoint\'
+    mySQLdotNETConnectorMsi: 'mysql.data.msi'
+    ajaxExtensionsPath: 'Infopoint\'
+    ajaxExtensionsMsi: 'ASPAJAXExtSetup.msi'
+    EnterpriseLibrary41Path: 'Infopoint\EnterpriseLibrary\'
+    EnterpriseLibrary41Msi: 'Enterprise Library 4.1 - October 2008.msi'
+    EnterpriseLibrary50Path: 'Infopoint\EnterpriseLibrary\'
+    EnterpriseLibrary50Msi: 'Enterprise Library 5.0.msi'
+    mySQLDriverPath: 'Infopoint\'
+    mySQLDriverMsi: 'MyODBC-3.51.11-2-win.msi'
+    reportViewerPath: 'Infopoint\'
+    reportViewerMsi: 'ReportViewer2008.exe'
+
+#dbClients section
+db_clients:  
+  sqlServer:
+    db_alias_name: "aliasInfopoint" 
+    db_server_name: "serverInfopoint"
+    db_x86_path: 'HKLM:\Software\Microsoft\MSSQLServer\Client\ConnectTo'
+    db_x64_path: 'HKLM:\Software\Wow6432Node\Microsoft\MSSQLServer\Client\ConnectTo'
+  mySql:
+  sybase:
+    installation_path32: 'C:\sybase'
+    installation_path64: 'C:\sybase'
+    config_file_name32: 'install32.txt'
+    config_file_name64: 'install64.txt'
+    env_sybase_name: 'SYBASE'
+    env_sybase_value: 'C:\sybase'
+    env_include_name: 'INCLUDE'
+    env_include_value: 'C:\sybase\OCS- 15_0\include;'
+    env_sybaseOCS_name: 'SYBASE_OCS'
+    env_sybaseOCS_value: 'OCS-15_0'
+  adoNet:
+
+#jdk clients
+jdk:
+  jdk_version: 7u80
+
+#Tomcat destination folder
+tomcat:
+  tomcat_dest_path: 'C:\'
+  tomcat_dest_path_dirName: 'Tomcat7\'
+
+#PHP destination folder
+php:
+  php_dest_path: 'C:\'
+  php_dest_path_dirName: 'PHP\'
+
+#Sybase
+sybase:
+  sybase_ini_dest_path: 'C:\sybase\ini\'
+
+#mySql
+mySql:
+  mySql_dll_dest_path: 'C:\Windows\SysWOW64\'
+
+#debugView
+dbgView:
+  dbgView_dest_path: 'C:\'  

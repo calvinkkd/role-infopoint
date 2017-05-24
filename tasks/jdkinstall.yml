@@ -1,0 +1,28 @@
+# This is the main tasks file for jdk installation
+- name: 'Installing jdk {{ jdk["jdk_version"] }} : Creating temporal ps1 execution folder'
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: directory
+
+#copy jdk to localhost
+- include: copyDir.yml 
+  vars: 
+     package_name: "jdk.x64"
+
+#copy jdk to localhost
+- include: copyDir.yml 
+  vars: 
+     package_name: "jdk.x86"
+
+- name: 'Installing jdk {{ jdk["jdk_version"] }}: Creating ps1 installation file from template'
+  template: src="installjdk.ps1.j2" dest="{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1Installjdk'] }}"  
+
+- name: 'Installing jdk {{ jdk["jdk_version"] }}: Starting installation'
+  win_shell: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}{{ config['install']['ps1Installjdk'] }}"    
+
+- name: Deleting temporal ps1 execution folder
+  win_file:
+    path: "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}"
+    state: absent
+  when: not config.debug
+  

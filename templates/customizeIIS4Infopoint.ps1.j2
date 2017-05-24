@@ -1,0 +1,112 @@
+# Notice:This file is being managed by Ansible
+# Any manual updates will be overwritten
+# filename: roles/role-infopoint/templates/customizeIIS4Infopoint.ps1.j2
+
+$exitValue = 0
+Try
+{
+    #Configuration parameters
+    $sitesRootPath = "{{ config['install']['iis_custom_path_default'] }}"
+    $mapasPath = "{{ config['install']['iis_custom_path_mapas'] }}"
+    $defaultIISLogsPath = "{{ config['install']['iis_custom_log'] }}"
+
+    $username = whoami
+    $password = "{{ users['localAdministrator']['password'] }}"
+    $pass = ConvertTo-SecureString $password -AsPlainText -Force
+    $cred = new-object system.management.automation.PSCredential $username,$pass
+    
+    ### Required folders
+    Set-Location -Path "C:\"
+    'Checking if the designated folder for Sites exists' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    if (Test-Path -Path $sitesRootPath) {
+        'No need to create the sites root folder' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    }
+    else 
+    {
+        New-Item -ItemType directory -Path $sitesRootPath     
+    }
+    
+    ### Default location for appcmd.exe
+    Set-Location -Path "C:\Windows\System32\inetsrv"
+    $appcmd = "C:\windows\system32\inetsrv\appcmd.exe"
+
+    ### Configuration
+    ### 1.5.1 Configuracion basica de IIS7
+    $resp = (&$appcmd set config -section:system.webServer/security/requestFiltering /-"hiddenSegments.[segment='bin']" /commit:apphost)
+    '1.5.1.1:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    ### 1.5.2 Permisos IIS
+    $resp = (&$appcmd set config -section:system.webServer/security/authentication/windowsAuthentication /enabled:"True" /commit:apphost)
+    '1.5.2.1:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    $resp = (&$appcmd set config -section:system.webServer/security/authentication/windowsAuthentication /extendedProtection.tokenChecking:"None" /commit:apphost)
+    '1.5.2.2:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    $resp = (&$appcmd set config -section:system.webServer/security/authentication/windowsAuthentication /useKernelMode:"True"  /commit:apphost)
+    '1.5.2.3:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    $resp = (&$appcmd set config -section:system.webServer/security/authentication/windowsAuthentication /-"providers.[value='Negotiate']" /commit:apphost)
+    '1.5.2.4:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    $resp = (&$appcmd set config -section:system.webServer/security/authentication/windowsAuthentication /+"providers.[value='Negotiate:Kerberos']" /commit:apphost)
+    '1.5.2.5:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+
+    ### 1.5.3 Configuración “Logging” de IIS
+    # Check if log folder exists
+    'Checking if the designated folder for IIS Logging exists' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    if (Test-Path -Path $defaultIISLogsPath) {
+        'No need to create the IIS default logging folder' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    }
+    else 
+    {
+        New-Item -ItemType directory -Path $defaultIISLogsPath     
+    }
+    $resp = (&$appcmd set config -section:system.applicationHost/sites /siteDefaults.logFile.directory:"$defaultIISLogsPath" /commit:apphost)
+    '1.5.3:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    
+    ### 1.5.4 Pooles
+    $resp = (&$appcmd set config /section:system.applicationHost/applicationPools /applicationPoolDefaults.enable32BitAppOnWin64:"False" /commit:apphost)
+    '1.5.4:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+
+    ### 1.5.5 Añadir “Handler Mapping” para PHP
+    $resp = (&$appcmd set config -section:system.webServer/handlers /+"[name='pHp5isapi',path='*.php',verb='*',scriptProcessor='{{ php['php_dest_path'] }}\{{ php['php_dest_path_dirName'] }}pHp5isapi.dll',requireAccess='Script',resourceType='Either']" /commit:apphost)
+    '1.5.5.1:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    
+    ### 1.5.6 Añadir isapi de Tomcat
+    $resp = (&$appcmd set config -section:system.webServer/isapiFilters /+"[name='Servlet',path='{{ tomcat['tomcat_dest_path'] }}{{ tomcat['tomcat_dest_path_dirName'] }}isapi\isapi_redirect.dll',preCondition='bitness64']" /commit:apphost)
+    '1.5.6.1:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    $resp = (&$appcmd set config -section:system.applicationHost/applicationPools /+"[name='Tomcat',enable32BitAppOnWin64='True',managedRuntimeVersion='',managedPipelineMode='Integrated']" /commit:apphost)
+    '1.5.6.2:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+
+    ### 1.5.7 Añadir Aplicaciones en el servidor IIS especificas para "tomcat"
+    $resp = (&$appcmd set config  -section:system.applicationHost/sites /+"[name='Default Web Site'].[path='/IsapiTomcat',applicationPool='Tomcat']" /commit:apphost)
+    '1.5.7.1:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    $resp = (&$appcmd set config  -section:system.applicationHost/sites /+"[name='Default Web Site'].[path='/IsapiTomcat',applicationPool='Tomcat'].[path='/',physicalPath='{{ tomcat['tomcat_dest_path'] }}{{ tomcat['tomcat_dest_path_dirName'] }}Isapi']" /commit:apphost)
+    '1.5.7.2:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    
+    ### Carpeta para alojar la aplicación "Mapas""
+    if (Test-Path -Path (Join-Path -Path $sitesRootPath -ChildPath $mapasPath)) {
+        'No need to create the folder' | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    }
+    else 
+    {
+        New-Item -ItemType directory -Path (Join-Path -Path $sitesRootPath -ChildPath $mapasPath)     
+    }
+    $resp = (&$appcmd set config  -section:system.applicationHost/sites /+"[name='Default Web Site'].[path='/Mapas',applicationPool='Tomcat']" /commit:apphost)
+    '1.5.7.3:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+    $mapasFullPath = Join-Path -Path $sitesRootPath -ChildPath $mapasPath
+    $resp = (&$appcmd set config  -section:system.applicationHost/sites /+"[name='Default Web Site'].[path='/Mapas',applicationPool='Tomcat'].[path='/',physicalPath='$mapasFullPath']" /commit:apphost)
+    '1.5.7.4:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+
+    ### 1.5.8 Resto de aplicaciones del IIS
+    #--- no hay info de este paso, pero nos deberían decir las aplicaciones a crear, y hacer lo mismo que en el paso 1.5.7. Una vez montadas, ya podrían desplegar las
+    #--- aplicaciones sobre la ruta determinada
+    #--- aunque esto también podría ser labor de XLDeploy
+
+    ### 1.5.9 Configurar SMTP
+    $resp = (&$appcmd set config  -section:system.net/mailSettings/smtp /network.host:"{{ config['install']['iis_custom_smtp'] }}"  /commit:webroot)
+    '1.5.9.1:' + $resp | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+
+}
+Catch
+{
+    $_.Exception.Message | out-file "{{ config['install']['configPath'] }}{{ config['install']['configTempFolder'] }}\LOGCustomizeIIS4InfoPoint.log" -Append
+}
+
+return $exitValue
+

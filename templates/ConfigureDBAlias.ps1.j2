@@ -1,0 +1,21 @@
+############################################################
+# Configure SQL Server client alias v0.1
+############################################################
+
+#We're going to see if the ConnectTo key already exists, and create it if it doesn't.
+if ((test-path -path {{ db_clients['sqlServer']['db_x86_path'] }}) -ne $True)
+{
+    New-Item {{ db_clients['sqlServer']['db_x86_path'] }}
+}
+if ((test-path -path {{ db_clients['sqlServer']['db_x64_path'] }}) -ne $True)
+{
+    New-Item {{ db_clients['sqlServer']['db_x64_path'] }}
+}
+  
+#Adding the extra "fluff" to tell the machine what type of alias it is
+$TCPAlias = ("DBMSSOCN, {{ db_clients['sqlServer']['db_server_name'] }}")
+  
+#Creating our TCP/IP Aliases
+New-ItemProperty -Path {{ db_clients['sqlServer']['db_x86_path'] }} -Name {{ db_clients['sqlServer']['db_alias_name'] }} -PropertyType String -Value $TCPAlias
+New-ItemProperty -Path {{ db_clients['sqlServer']['db_x64_path'] }} -Name {{ db_clients['sqlServer']['db_alias_name'] }} -PropertyType String -Value $TCPAlias
+

@@ -1,0 +1,10 @@
+---
+# MySQL Driver installation
+
+- name: 'MySQL 3.51 Driver'
+  win_package:
+    path: "{{ config['repo']['basePath'] }}{{ config['repo']['mySQLDriverPath'] }}{{ config['repo']['mySQLDriverMsi'] }}"
+    productid: '{29042B1C-0713-4575-B7CA-5C8E7B0899D4}'
+    arguments: '/q '
+    ensure: present
+    
